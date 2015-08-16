@@ -1,0 +1,83 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.paularanas.popularmovies.DetailsActivityFragment">
+
+
+        <TextView
+            android:id="@+id/textView_originalTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@color/cyan"
+            android:gravity="left"
+            android:paddingBottom="@dimen/original_title_padding_bottom"
+            android:paddingLeft="@dimen/original_title_padding_left"
+            android:paddingRight="@dimen/original_title_padding_right"
+            android:paddingTop="@dimen/original_title_padding_top"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/white"
+            android:textSize="@dimen/original_title_text_size" />
+
+        <ImageView
+            android:id="@+id/poster_thumbnail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textView_originalTitle"
+            android:layout_marginLeft="@dimen/poster_thumbnail_margin_left"
+            android:layout_marginTop="@dimen/poster_thumbnail_margin_top" />
+
+        <TextView
+            android:id="@+id/textView_release_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textView_originalTitle"
+            android:layout_marginLeft="@dimen/release_date_margin_left"
+            android:layout_marginTop="@dimen/release_date_margin_top"
+            android:layout_toRightOf="@+id/poster_thumbnail"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/teal"
+            android:textSize="@dimen/release_date_text_size" />
+
+
+        <TextView
+            android:id="@+id/textView_user_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textView_release_date"
+            android:layout_below="@+id/textView_release_date"
+            android:layout_marginTop="@dimen/user_rating_margin_top"
+            android:layout_toRightOf="@+id/poster_thumbnail"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/black"
+            android:textSize="@dimen/user_rating_text_size" />
+
+        <TextView
+            android:id="@+id/textView_overview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/poster_thumbnail"
+            android:layout_marginBottom="@dimen/overview_margin_bottom"
+            android:layout_marginLeft="@dimen/overview_margin_left"
+            android:layout_marginRight="@dimen/overview_margin_right"
+            android:layout_marginTop="@dimen/overview_margin_top"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/teal"
+            android:textSize="@dimen/overview_text_size" />
+
+    </RelativeLayout>
+</ScrollView>

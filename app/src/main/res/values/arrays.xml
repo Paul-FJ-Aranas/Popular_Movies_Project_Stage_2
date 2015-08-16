@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- sort by list preferences -->
+    <array name="sort_options">
+        <item>@string/sort_by_popularity_label</item>
+        <item>@string/sort_by_highest_rated_label</item>
+    </array>
+
+    <array name="sort_values">
+        <item>@string/sort_by_popularity_value</item>
+        <item>@string/sort_by_highest_rated_value</item>
+    </array>
+
+</resources>
