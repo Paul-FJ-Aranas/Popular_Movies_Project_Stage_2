@@ -39,7 +39,9 @@ public class Movie implements Parcelable {
         return posterPath;
     }
 
-    public double getVoteAverage() {return voteAverage;}
+    public double getVoteAverage() {
+        return voteAverage;
+    }
 
     public String getPosterLastPathSegment() {
         return posterLastPathSegment;
@@ -64,11 +66,11 @@ public class Movie implements Parcelable {
     public static ArrayList<Movie> fromJson(JSONArray jsonArray) {
 
 
-        ArrayList<Movie> movies = new ArrayList<Movie>(jsonArray.length());
+        ArrayList<Movie> movies = new ArrayList<>(jsonArray.length());
 
         //loop through results in json array, decode and convert to movie object
         for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject movieJson = null;
+            JSONObject movieJson;
             try {
                 movieJson = jsonArray.getJSONObject(i);
             } catch (Exception e) {

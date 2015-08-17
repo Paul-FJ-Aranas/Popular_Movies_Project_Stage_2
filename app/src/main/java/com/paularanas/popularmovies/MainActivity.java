@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +32,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private GridView gridView;
     private ArrayList<Movie> movies;
     private MovieAsyncTask movieTask = null;
+    private static final String MOVIES_KEY = "saved_movieArrayList";
+    private static final String LOG_TAG = "Error: ";
+    private String currentSortingOrder = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,30 +42,19 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         //context to delegate for PassDataInterface
         MovieAsyncTask.delegate = this;
         setContentView(R.layout.activity_main);
+        gridView = (GridView) findViewById(R.id.gridView);
         // set sort by preferences
         SharedPreferences prefs = getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("sort_by", getString(R.string.sort_by_popularity_value));
-        gridView = (GridView) findViewById(R.id.gridView);
-        //if network connection is available connect and fetch data through MovieAsyncTask
-        if (movieTask == null) {
-            ConnectivityManager connMgr = (ConnectivityManager)
-                    getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-            if (netInfo != null && netInfo.isConnected()) {
-                movieTask = new MovieAsyncTask(this);
-                movieTask.execute(getString(R.string.sort_by_popularity_value));
-            } else {
-                Toast networkUnavailableMessage = null;
-                if (networkUnavailableMessage != null) {
-                    networkUnavailableMessage.cancel();
-                } else {
-                    networkUnavailableMessage = Toast.makeText(this, "Can't connect to network", Toast.LENGTH_SHORT);
-                    networkUnavailableMessage.show();
-                }
-            }
+        if (savedInstanceState != null) {
+            //retrieve data and populate the adapter
+            ArrayList<Movie> movies = savedInstanceState.getParcelableArrayList(MOVIES_KEY);
+        } else {
+            updateMovies(currentSortingOrder);
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -106,36 +99,64 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
 
-    public void updateMovies() {
-        //updates after preference change
-        //fetches data through MovieAsyncTask if network connection is available
+    public void updateMovies(String sortParam) {
+        //calls API with new sort order params
+        MovieAsyncTask task = new MovieAsyncTask(this);
+        task.execute(sortParam);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //if network is available and sorting order has been changed, update data
+        if (!isNetworkAvailable()) {
+            Log.e(LOG_TAG, "Network is unavailable");
+            Toast networkUnavailableMessage = null;
+
+
+            if (networkUnavailableMessage != null) {
+                networkUnavailableMessage.cancel();
+            } else {
+                CharSequence text = getString(R.string.network_unavailable_message);
+                networkUnavailableMessage = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
+                networkUnavailableMessage.show();
+            }
+        } else {
+            String sortingOrderValue = Utility.getSortingOrderPreference(this);
+
+            if (sortingOrderValue != null && !sortingOrderValue.equals(currentSortingOrder)) {
+                Log.d(LOG_TAG, "Updating movies via API call");
+                currentSortingOrder = sortingOrderValue;
+                updateMovies(currentSortingOrder);
+
+            }
+
+        }
+
+
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // save movie data
+        outState.putParcelableArrayList("MOVIES_KEY", movies);
+        //save sort order
+        outState.putString("current_sort_order", currentSortingOrder);
+    }
+
+    // check if network is available
+    private boolean isNetworkAvailable() {
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
         if (netInfo != null && netInfo.isConnected()) {
-            MovieAsyncTask task = new MovieAsyncTask(this);
-            SharedPreferences prefs = getDefaultSharedPreferences(this);
-            String sortParam = prefs.getString(getString(R.string.pref_sort_key), getString(R.string.sort_by_default_value));
-            task.execute(sortParam);
-        } else {
-            Toast networkUnavailableMessage = null;
-            if (networkUnavailableMessage != null) {
-                networkUnavailableMessage.cancel();
-            } else {
-                networkUnavailableMessage = Toast.makeText(this, "Can't connect to network", Toast.LENGTH_SHORT);
-                networkUnavailableMessage.show();
-            }
-
+            return true;
         }
-    }
+        return false;
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //refresh movies
-        updateMovies();
     }
-
 }
 
 class MoviePosterAdapter extends BaseAdapter {

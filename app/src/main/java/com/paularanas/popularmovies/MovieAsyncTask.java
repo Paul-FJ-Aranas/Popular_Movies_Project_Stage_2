@@ -24,7 +24,7 @@ import java.util.ArrayList;
 public class MovieAsyncTask extends AsyncTask<String, Void, JSONObject> {
     static PassDataInterface delegate;
     Context context;
-    private static final String TAG = "Error: ";
+    private static final String LOG_TAG = "Error: ";
 
 
     public MovieAsyncTask(Context c) {
@@ -45,8 +45,8 @@ public class MovieAsyncTask extends AsyncTask<String, Void, JSONObject> {
         String api_key = KeyConstants.API_KEY;
         String baseUrl = KeyConstants.BASE_URL;
         JSONObject jObject = null;
-        URL myURL = null;
-        String url = null;
+        URL myURL;
+        String url;
 
         try {
 
@@ -66,9 +66,9 @@ public class MovieAsyncTask extends AsyncTask<String, Void, JSONObject> {
             jObject = stringToJsonObject(jsonFeed);
 
         } catch (MalformedURLException e) {
-            Log.e(TAG, "Malformed URL");
+            Log.e(LOG_TAG, "Malformed URL");
         } catch (IOException e) {
-            Log.e(TAG, "IO connection error");
+            Log.e(LOG_TAG, "IO connection error");
 
         } finally
 
@@ -80,7 +80,7 @@ public class MovieAsyncTask extends AsyncTask<String, Void, JSONObject> {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "Unable to close input stream");
+                    Log.e(LOG_TAG, "Unable to close input stream");
                 }
             }
         }
@@ -100,7 +100,7 @@ public class MovieAsyncTask extends AsyncTask<String, Void, JSONObject> {
         try {
             movieJson = obj.getJSONArray("results");
         } catch (JSONException e) {
-            Log.e(TAG, "Json parsing error");
+            Log.e(LOG_TAG, "Json parsing error");
         }
 
 
@@ -115,17 +115,15 @@ public class MovieAsyncTask extends AsyncTask<String, Void, JSONObject> {
         StringBuilder sb = new StringBuilder();
         BufferedReader buffer = new BufferedReader(new InputStreamReader(stream));
         String line;
+
         try {
             while ((line = buffer.readLine()) != null) {
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             }
         } catch (IOException e) {
-            Log.e(TAG, "IO error while creating StringBuilder object");
+            Log.e(LOG_TAG, "IO error while creating StringBuilder object");
         }
-        String result = sb.toString();
-
-
-        return result;
+        return sb.toString();
     }
 
     public JSONObject stringToJsonObject(String str) {
@@ -135,7 +133,7 @@ public class MovieAsyncTask extends AsyncTask<String, Void, JSONObject> {
             jObject = new JSONObject(str);
 
         } catch (JSONException e) {
-            Log.e(TAG, "Json parsing error");
+            Log.e(LOG_TAG, "Json parsing error");
         }
         return jObject;
 
@@ -143,7 +141,7 @@ public class MovieAsyncTask extends AsyncTask<String, Void, JSONObject> {
 
     //used to pass data to MainActivity
     interface PassDataInterface {
-        public void passReturnedData(ArrayList<Movie> movies);
+        void passReturnedData(ArrayList<Movie> movies);
 
 
     }

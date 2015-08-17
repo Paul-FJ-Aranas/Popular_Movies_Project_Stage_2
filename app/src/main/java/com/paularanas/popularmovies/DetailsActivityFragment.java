@@ -28,7 +28,7 @@ public class DetailsActivityFragment extends Fragment {
         // fill views in with relevant data
         Intent movieIntent = getActivity().getIntent();
         if (movieIntent != null && movieIntent.hasExtra("movieData")) {
-            Movie movie = (Movie) movieIntent.getParcelableExtra("movieData");
+            Movie movie = movieIntent.getParcelableExtra("movieData");
 
             TextView titleText = (TextView) view.findViewById(R.id.textView_originalTitle);
             titleText.setText(movie.getOriginalTitle());
