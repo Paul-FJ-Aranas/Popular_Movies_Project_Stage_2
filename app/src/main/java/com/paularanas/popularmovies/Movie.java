@@ -47,6 +47,19 @@ public class Movie implements Parcelable {
         return posterLastPathSegment;
     }
 
+    public Movie() {
+
+    }
+
+    public Movie(Parcel source) {
+        originalTitle = source.readString();
+        overview = source.readString();
+        releaseDate = source.readString();
+        posterPath = source.readString();
+        voteAverage = source.readDouble();
+        posterLastPathSegment = source.readString();
+    }
+
     public static Movie fromJson(JSONObject jsonObject) {
         Movie m = new Movie();
         try {
@@ -91,13 +104,7 @@ public class Movie implements Parcelable {
     public static final Parcelable.Creator<Movie> CREATOR = new Creator<Movie>() {
         @Override
         public Movie createFromParcel(Parcel source) {
-            Movie movie = new Movie();
-            movie.originalTitle = source.readString();
-            movie.overview = source.readString();
-            movie.releaseDate = source.readString();
-            movie.posterPath = source.readString();
-            movie.voteAverage = source.readDouble();
-            return movie;
+            return new Movie(source);
         }
 
         @Override
@@ -119,6 +126,7 @@ public class Movie implements Parcelable {
         dest.writeString(releaseDate);
         dest.writeString(posterPath);
         dest.writeDouble(voteAverage);
+        dest.writeString(posterLastPathSegment);
 
     }
 
