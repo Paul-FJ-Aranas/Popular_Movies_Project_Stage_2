@@ -14,11 +14,13 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-        FragmentManager manager = getSupportFragmentManager();
-        DetailsActivityFragment detailsFragment = new DetailsActivityFragment();
-        android.support.v4.app.FragmentTransaction transaction = manager.beginTransaction();
-        transaction.add(R.id.fragment_layout, detailsFragment, "DetailsFragment");
-        transaction.commit();
+       if (savedInstanceState == null) {
+            FragmentManager manager = getSupportFragmentManager();
+            DetailsActivityFragment detailsFragment = new DetailsActivityFragment();
+            android.support.v4.app.FragmentTransaction transaction = manager.beginTransaction();
+            transaction.add(R.id.fragment_layout, detailsFragment, "DetailsFragment");
+            transaction.commit();
+       }
     }
 
     @Override

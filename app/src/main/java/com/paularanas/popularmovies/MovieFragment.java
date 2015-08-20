@@ -73,8 +73,11 @@ public class MovieFragment extends Fragment implements AdapterView.OnItemClickLi
         if (savedInstanceState != null) {
             index = savedInstanceState.getInt("scrollPosition");
             grid.smoothScrollToPosition(index);
+            currentSortingOrder = savedInstanceState.getString("current_sort_order");
+
         }
     }
+
 
     @Override
     public void onResume() {
@@ -91,6 +94,7 @@ public class MovieFragment extends Fragment implements AdapterView.OnItemClickLi
             String sortingOrderValue = Utility.getSortingOrderPreference(getActivity());
             if (sortingOrderValue != null && !sortingOrderValue.equals(currentSortingOrder)) {
                 updateMovies(sortingOrderValue);
+                currentSortingOrder = sortingOrderValue;
             }
         }
     }
@@ -109,6 +113,7 @@ public class MovieFragment extends Fragment implements AdapterView.OnItemClickLi
         outState.putParcelableArrayList("MOVIES_KEY", movieList);
         index = grid.getFirstVisiblePosition();
         outState.putInt("scrollPosition", index);
+        outState.putString("current_sort_order", currentSortingOrder);
         super.onSaveInstanceState(outState);
     }
 
@@ -145,86 +150,86 @@ public class MovieFragment extends Fragment implements AdapterView.OnItemClickLi
     }
 
 
-    class MoviePosterAdapter extends BaseAdapter {
-        private Context context;
-        private ArrayList<Movie> movies = new ArrayList<>();
+class MoviePosterAdapter extends BaseAdapter {
+    private Context context;
+    private ArrayList<Movie> movies = new ArrayList<>();
 
-        public MoviePosterAdapter(Context c) {
-            context = c;
-        }
+    public MoviePosterAdapter(Context c) {
+        context = c;
+    }
 
-        @Override
-        public int getCount() {
-            return movieList.size();
-
-        }
-
-        @Override
-        public Object getItem(int position) {
-
-            return movieList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View gridBox = convertView;
-            MovieViewHolder holder;
-            ImageView poster;
-
-
-            if (gridBox == null) {
-                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                gridBox = inflater.inflate(R.layout.single_poster, parent, false);
-                holder = new MovieViewHolder(gridBox);
-                gridBox.setTag(holder);
-            } else {
-                // recycle, get Views from MovieViewHolder class
-                holder = (MovieViewHolder) gridBox.getTag();
-            }
-            //get imageview from holder and data at specific position
-            poster = holder.imageView;
-            Movie temp = movieList.get(position);
-
-            // for movies without provided film posters, set title text below "No Poster Available" image
-            TextView title = holder.textView;
-            if (temp.getPosterLastPathSegment().equals("null")) {
-                title.setVisibility(View.VISIBLE);
-                title.setText(temp.getOriginalTitle());
-            } else {
-                title.setVisibility(View.GONE);
-            }
-
-            //load different size error images depending on orientation
-            int orientation = context.getResources().getConfiguration().orientation;
-            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                Picasso.with(context).load(temp.getPosterPath())
-                        .noPlaceholder().error(R.drawable.movies_placeholder).into(poster);
-            } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                Picasso.with(context).load(temp.getPosterPath())
-                        .noPlaceholder().error(R.drawable.movies_placeholder_land).into(poster);
-            }
-
-            return gridBox;
-        }
+    @Override
+    public int getCount() {
+        return movieList.size();
 
     }
 
-    static class MovieViewHolder {
-        ImageView imageView;
-        TextView textView;
+    @Override
+    public Object getItem(int position) {
 
-        MovieViewHolder(View v) {
-            imageView = (ImageView) v.findViewById(R.id.imageView);
-            textView = (TextView) v.findViewById(R.id.text_poster_title);
-
-        }
+        return movieList.get(position);
     }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View gridBox = convertView;
+        MovieViewHolder holder;
+        ImageView poster;
+
+
+        if (gridBox == null) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            gridBox = inflater.inflate(R.layout.single_poster, parent, false);
+            holder = new MovieViewHolder(gridBox);
+            gridBox.setTag(holder);
+        } else {
+            // recycle, get Views from MovieViewHolder class
+            holder = (MovieViewHolder) gridBox.getTag();
+        }
+        //get imageview from holder and data at specific position
+        poster = holder.imageView;
+        Movie temp = movieList.get(position);
+
+        // for movies without provided film posters, set title text below "No Poster Available" image
+        TextView title = holder.textView;
+        if (temp.getPosterLastPathSegment().equals("null")) {
+            title.setVisibility(View.VISIBLE);
+            title.setText(temp.getOriginalTitle());
+        } else {
+            title.setVisibility(View.GONE);
+        }
+
+        //load different size error images depending on orientation
+        int orientation = context.getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Picasso.with(context).load(temp.getPosterPath())
+                    .noPlaceholder().error(R.drawable.movies_placeholder).into(poster);
+        } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Picasso.with(context).load(temp.getPosterPath())
+                    .noPlaceholder().error(R.drawable.movies_placeholder_land).into(poster);
+        }
+
+        return gridBox;
+    }
+
+}
+
+static class MovieViewHolder {
+    ImageView imageView;
+    TextView textView;
+
+    MovieViewHolder(View v) {
+        imageView = (ImageView) v.findViewById(R.id.imageView);
+        textView = (TextView) v.findViewById(R.id.text_poster_title);
+
+    }
+}
 }
 
 
