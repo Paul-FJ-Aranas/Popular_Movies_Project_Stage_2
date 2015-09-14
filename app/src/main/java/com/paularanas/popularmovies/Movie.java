@@ -13,19 +13,22 @@ import java.util.ArrayList;
 /**
  * Created by Paul Aranas on 8/2/2015.
  */
-public class Movie implements Parcelable {
+public class Movie<T extends Parcelable> implements Parcelable, MovieAdapterInterface {
     private static final String TAG = "Error: ";
+    private int id;
     private String originalTitle;
     private String overview;
     private String releaseDate;
     private String posterPath;
+    private String backdropPath;
     private double voteAverage;
     private String posterLastPathSegment;
 
 
-    public String getOriginalTitle() {
-        return originalTitle;
-    }
+
+    public int getId() {return id;}
+
+    public String getOriginalTitle() {return originalTitle;}
 
     public String getOverview() {
         return overview;
@@ -39,6 +42,8 @@ public class Movie implements Parcelable {
         return posterPath;
     }
 
+    public String getBackdropPath() {return backdropPath;}
+
     public double getVoteAverage() {
         return voteAverage;
     }
@@ -51,11 +56,14 @@ public class Movie implements Parcelable {
 
     }
 
+
     public Movie(Parcel source) {
+        id = source.readInt();
         originalTitle = source.readString();
         overview = source.readString();
         releaseDate = source.readString();
         posterPath = source.readString();
+        backdropPath = source.readString();
         voteAverage = source.readDouble();
         posterLastPathSegment = source.readString();
     }
@@ -63,12 +71,15 @@ public class Movie implements Parcelable {
     public static Movie fromJson(JSONObject jsonObject) {
         Movie m = new Movie();
         try {
+            m.id = jsonObject.getInt("id");
             m.originalTitle = jsonObject.getString("original_title");
             m.overview = jsonObject.getString("overview");
             m.releaseDate = jsonObject.getString("release_date");
             m.posterPath = "http://image.tmdb.org/t/p/w185" + jsonObject.getString("poster_path");
-            m.posterLastPathSegment = jsonObject.getString("poster_path");
+            m.backdropPath = "http://image.tmdb.org/t/p/w780" + jsonObject.getString("backdrop_path");
             m.voteAverage = jsonObject.getDouble("vote_average");
+            m.posterLastPathSegment = jsonObject.getString("poster_path");
+
         } catch (JSONException e) {
             Log.e(TAG, "Json parsing error");
         }
@@ -121,24 +132,34 @@ public class Movie implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeString(originalTitle);
         dest.writeString(overview);
         dest.writeString(releaseDate);
         dest.writeString(posterPath);
+        dest.writeString(backdropPath);
         dest.writeDouble(voteAverage);
         dest.writeString(posterLastPathSegment);
+
 
     }
 
     @Override
     public String toString() {
         return "Movie{" +
-                "originalTitle='" + originalTitle + '\'' +
+                "id=" + id +
+                ", originalTitle='" + originalTitle + '\'' +
                 ", overview='" + overview + '\'' +
                 ", releaseDate='" + releaseDate + '\'' +
                 ", posterPath='" + posterPath + '\'' +
+                ", backdropPath='" + backdropPath + '\'' +
                 ", voteAverage=" + voteAverage +
+                ", posterLastPathSegment='" + posterLastPathSegment + '\'' +
                 '}';
     }
 
+    @Override
+    public String getDescription() {
+        return "All kinds of movies to choose from";
+    }
 }

@@ -1,12 +1,20 @@
 package com.paularanas.popularmovies;
 
+import android.app.Activity;
 import android.app.Fragment;
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,21 +26,39 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import static com.paularanas.popularmovies.MovieContract.FavoriteMovieTable;
+import static com.paularanas.popularmovies.MovieContract.URI_FAVORITES;
+
 /**
  * Created by Paul Aranas on 8/18/2015.
  */
-public class MovieFragment extends Fragment implements AdapterView.OnItemClickListener, OnFinishedTask {
+public class MovieFragment extends Fragment implements AdapterView.OnItemClickListener, OnFinishedTask, LoaderManager.LoaderCallbacks<Cursor> {
     private static final String LOG_TAG = "Error: ";
+    private static final int CURSOR_LOADER = 1;
     private String currentSortingOrder = null;
-    private ArrayList<Movie> movieList = new ArrayList<>();
+    private ArrayList<? extends Parcelable> movieList = new ArrayList<>();
     private GridView grid;
     private Context context;
     private MoviePosterAdapter adapter;
     private int index;
+    OnMovieSelectedListener listener;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (activity instanceof OnMovieSelectedListener) {
+            listener = (OnMovieSelectedListener) activity;
+        } else {
+            throw new ClassCastException(
+                    activity.toString()
+                            + " it is necessary to implement MovieFragment.OnMovieSelectedListener");
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,11 +87,12 @@ public class MovieFragment extends Fragment implements AdapterView.OnItemClickLi
             grid.invalidateViews();
             grid.setAdapter(adapter);
         }
-
         grid.setOnItemClickListener(this);
+
         return view;
 
     }
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -92,10 +119,20 @@ public class MovieFragment extends Fragment implements AdapterView.OnItemClickLi
             networkUnavailableMessage.show();
         } else {
             String sortingOrderValue = Utility.getSortingOrderPreference(getActivity());
-            if (sortingOrderValue != null && !sortingOrderValue.equals(currentSortingOrder)) {
+            if (sortingOrderValue != null && !sortingOrderValue.equals(currentSortingOrder) && !sortingOrderValue.equals("favorites")) {
                 updateMovies(sortingOrderValue);
-                currentSortingOrder = sortingOrderValue;
             }
+            if (sortingOrderValue != null && sortingOrderValue.equals("favorites")) {
+                getLoaderManager().initLoader(CURSOR_LOADER, null, this);
+                Boolean isEmpty = checkEmptyTable();
+                if (isEmpty) {
+                    FavoritesEmptyFragment favoritesEmptyFragment = new FavoritesEmptyFragment();
+                    favoritesEmptyFragment.show(getFragmentManager(), "FavEmptyDialog");
+                    Utility.initializeSortPreference(getActivity());
+                }
+
+            }
+            currentSortingOrder = sortingOrderValue;
         }
     }
 
@@ -106,6 +143,7 @@ public class MovieFragment extends Fragment implements AdapterView.OnItemClickLi
         task.execute(sortParam);
 
     }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -131,32 +169,115 @@ public class MovieFragment extends Fragment implements AdapterView.OnItemClickLi
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //Pass parcelable movie object to DetailsActivity to display relevant information
-        // for specific poster that is clicked
-        Movie movie = (Movie) parent.getAdapter().getItem(position);
-        Intent passMovieIntent = new Intent(getActivity(), DetailsActivity.class);
-        passMovieIntent.putExtra("movieData", movie);
-        startActivity(passMovieIntent);
+        //Pass parcelable movie object to DetailsActivityFragment via MainActivity
+        // to display relevant information for specific poster that is clicked
+       Parcelable movie = (Parcelable) parent.getAdapter().getItem(position);
+        listener.onMovieSelected(movie);
     }
 
     //receive movie data in ArrayList from MovieAsyncTask
-    //set adapter and OnClickListener
+    //set adapter
     @Override
     public void passData(ArrayList<Movie> movies) {
         movieList = movies;
         adapter = new MoviePosterAdapter(context);
         grid.setAdapter(adapter);
-        // grid.setOnItemClickListener(this);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case CURSOR_LOADER:
+                return new CursorLoader(getActivity(), URI_FAVORITES, null,
+                        null, null, null);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+
+        ArrayList<FavoriteMovie> favoriteListTemp = new ArrayList<>();
+
+        if (data.moveToFirst()) {
+            do {
+
+                int identifications = data.getInt(data
+                        .getColumnIndex(FavoriteMovieTable.MOVIE_ID));
+                String titles = data.getString(data.getColumnIndex(FavoriteMovieTable.TITLE));
+                String overviews = data.getString(data.getColumnIndex(FavoriteMovieTable.OVERVIEW));
+                String releaseDates = data.getString(data.getColumnIndex(FavoriteMovieTable.RELEASE_DATE));
+                String filmPosters = data.getString(data.getColumnIndex(FavoriteMovieTable.POSTER_PATH));
+                String backdrops = data.getString(data.getColumnIndex(FavoriteMovieTable.BACKDROP));
+                double voteAverages = data.getDouble(data.getColumnIndex(FavoriteMovieTable.VOTE_AVERAGE));
+                String lastPaths = data.getString(data.getColumnIndex(FavoriteMovieTable.POSTER_LAST_PATH));
+                String trailerNames = data.getString(data.getColumnIndex(FavoriteMovieTable.TRAILERS_NAMES));
+                String trailerSizes = data.getString(data.getColumnIndex(FavoriteMovieTable.TRAILERS_SIZES));
+                String trailerSources = data.getString(data.getColumnIndex(FavoriteMovieTable.TRAILERS_SOURCES));
+                String reviewIds = data.getString(data.getColumnIndex(FavoriteMovieTable.REVIEWS_ID));
+                String reviewAuthors = data.getString(data.getColumnIndex(FavoriteMovieTable.REVIEWS_AUTHOR));
+                String reviewContent = data.getString(data.getColumnIndex(FavoriteMovieTable.REVIEWS_CONTENT));
+
+                favoriteListTemp.add(new FavoriteMovie(identifications, titles, overviews, releaseDates, filmPosters,
+                        backdrops, voteAverages, lastPaths, trailerNames, trailerSizes,
+                        trailerSources, reviewIds, reviewAuthors, reviewContent));
+
+            } while (data.moveToNext());
+
+            movieList = favoriteListTemp;
+            grid.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+
+
+        }
+
+
+    }
+
+    private Boolean checkEmptyTable() {
+        boolean empty = true;
+        MovieDatabaseHelper helper = new MovieDatabaseHelper(getActivity());
+        SQLiteDatabase db = helper.getReadableDatabase();
+        long count = DatabaseUtils.queryNumEntries(db, MovieContract.FavoriteMovieTable.TABLE_NAME);
+        if (count == 0) {
+            db.close();
+            return true;
+        }
+        db.close();
+        return false;
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+public interface OnMovieSelectedListener {
+
+    public void onMovieSelected(Parcelable obj);
+
+}
+
+    public void setActivateOnMovieClick(boolean activateOnItemClick) {
+        // CHOICE_MODE_SINGLE, movies in activated state on touch
+        grid.setChoiceMode(
+                activateOnItemClick ? GridView.CHOICE_MODE_SINGLE
+                        : GridView.CHOICE_MODE_NONE);
     }
 
 
 class MoviePosterAdapter extends BaseAdapter {
     private Context context;
-    private ArrayList<Movie> movies = new ArrayList<>();
+    private String currentSortingOrder;
+    private ArrayList<MovieAdapterInterface> arrayList;
 
     public MoviePosterAdapter(Context c) {
         context = c;
+
     }
+
 
     @Override
     public int getCount() {
@@ -194,30 +315,58 @@ class MoviePosterAdapter extends BaseAdapter {
         }
         //get imageview from holder and data at specific position
         poster = holder.imageView;
-        Movie temp = movieList.get(position);
+        Movie temp = null;
+        FavoriteMovie temp1 = null;
+        if (movieList.get(position) instanceof Movie) {
+            temp = (Movie) movieList.get(position);
+            // for movies without provided film posters, set title text below "No Poster Available" image
+            TextView title = holder.textView;
+            if (temp.getPosterLastPathSegment().equals("null")) {
+                title.setVisibility(View.VISIBLE);
+                title.setText(temp.getOriginalTitle());
+            } else {
+                title.setVisibility(View.GONE);
+            }
 
-        // for movies without provided film posters, set title text below "No Poster Available" image
-        TextView title = holder.textView;
-        if (temp.getPosterLastPathSegment().equals("null")) {
-            title.setVisibility(View.VISIBLE);
-            title.setText(temp.getOriginalTitle());
-        } else {
-            title.setVisibility(View.GONE);
+            //load different size error images depending on orientation
+            int orientation = context.getResources().getConfiguration().orientation;
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                Picasso.with(context).load(temp.getPosterPath())
+                        .noPlaceholder().error(R.drawable.movies_placeholder).into(poster);
+            } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                Picasso.with(context).load(temp.getPosterPath())
+                        .noPlaceholder().error(R.drawable.movies_placeholder_land).into(poster);
+            }
+
+
+        } else if (movieList.get(position) instanceof FavoriteMovie) {
+            temp1 = (FavoriteMovie) movieList.get(position);
+
+            // for movies without provided film posters, set title text below "No Poster Available" image
+            TextView title = holder.textView;
+            if (temp1.getFavoritePosterLastPathSegment().equals("null")) {
+                title.setVisibility(View.VISIBLE);
+                title.setText(temp1.getFavoriteTitle());
+            } else {
+                title.setVisibility(View.GONE);
+            }
+
+            //load different size error images depending on orientation
+            int orientation = context.getResources().getConfiguration().orientation;
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                Picasso.with(context).load(temp1.getFavoritePosterPath()).networkPolicy(NetworkPolicy.NO_CACHE)
+                        .noPlaceholder().error(R.drawable.movies_placeholder).into(poster);
+            } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                Picasso.with(context).load(temp1.getFavoritePosterPath()).networkPolicy(NetworkPolicy.NO_CACHE)
+                        .noPlaceholder().error(R.drawable.movies_placeholder_land).into(poster);
+            }
+
         }
 
-        //load different size error images depending on orientation
-        int orientation = context.getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Picasso.with(context).load(temp.getPosterPath())
-                    .noPlaceholder().error(R.drawable.movies_placeholder).into(poster);
-        } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Picasso.with(context).load(temp.getPosterPath())
-                    .noPlaceholder().error(R.drawable.movies_placeholder_land).into(poster);
-        }
 
         return gridBox;
-    }
 
+    }
 }
 
 static class MovieViewHolder {
@@ -227,10 +376,7 @@ static class MovieViewHolder {
     MovieViewHolder(View v) {
         imageView = (ImageView) v.findViewById(R.id.imageView);
         textView = (TextView) v.findViewById(R.id.text_poster_title);
-
     }
+
 }
 }
-
-
-

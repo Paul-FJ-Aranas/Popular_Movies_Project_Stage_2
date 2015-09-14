@@ -4,11 +4,13 @@
     <array name="sort_options">
         <item>@string/sort_by_popularity_label</item>
         <item>@string/sort_by_highest_rated_label</item>
+        <item>@string/sort_by_favorites_label</item>
     </array>
 
     <array name="sort_values">
         <item>@string/sort_by_popularity_value</item>
         <item>@string/sort_by_highest_rated_value</item>
+        <item>@string/sort_by_favorites_value</item>
     </array>
 
 </resources>

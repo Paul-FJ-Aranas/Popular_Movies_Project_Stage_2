@@ -100,7 +100,6 @@ import java.util.ArrayList;
             JSONArray movieJson = null;
             try {
                 movieJson = obj.getJSONArray("results");
-                Log.d("PFFFJJAA", movieJson.toString());
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Json parsing error");
             }

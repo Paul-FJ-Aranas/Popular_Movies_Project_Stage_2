@@ -23,6 +23,8 @@ public class MovieSettingsFragment extends PreferenceFragment implements Prefere
 
     }
 
+
+
     private void bindPreferenceSummaryToValue(Preference preference) {
         preference.setOnPreferenceChangeListener(this);
         onPreferenceChange(preference, getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));

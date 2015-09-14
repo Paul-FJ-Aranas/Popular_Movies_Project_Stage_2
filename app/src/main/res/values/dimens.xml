@@ -18,11 +18,23 @@
     <dimen name="poster_thumbnail_margin_top">5dp</dimen>
 
     <!-- Details release date -->
-    <dimen name="release_date_margin_left">40dp</dimen>
-    <dimen name="release_date_margin_top">5dp</dimen>
+    <dimen name="release_date_margin_top">15dp</dimen>
+    <dimen name="release_date_margin_left">15dp</dimen>
+
+    <!-- Details release date, user rating, favorite button for tablet -->
+    <dimen name="release_date_tablet__margin_left">40dp</dimen>
+    <dimen name="user_rating_tablet_margin_left">40dp</dimen>
+    <dimen name="favorite_button_tablet_margin_left">40dp</dimen>
+
 
     <!-- Details user rating -->
-    <dimen name="user_rating_margin_top">5dp</dimen>
+    <dimen name="user_rating_margin_top">15dp</dimen>
+    <dimen name="user_rating_margin_left">15dp</dimen>
+
+    <!-- Details favorite button-->
+    <dimen name="favorite_button_margin_left">15dp</dimen>
+
+
 
     <!-- Details overview landscape-->
     <dimen name="overview_land_margin_bottom">20dp</dimen>
@@ -41,4 +53,5 @@
     <dimen name="release_date_text_size">14sp</dimen>
     <dimen name="user_rating_text_size">12sp</dimen>
     <dimen name="overview_text_size">14sp</dimen>
+    <dimen name="overview_text_size_tablet">18sp</dimen>
 </resources>

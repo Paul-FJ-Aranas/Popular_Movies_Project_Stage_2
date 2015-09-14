@@ -12,10 +12,13 @@
     <string name="sort_preference_title">Sort by</string>
     <string name="sort_by_summary">Most popular</string>
     <string name="sort_by_summary_ratings">Highest rated</string>
+    <string name="sort_by_summary_favorites">Favorites</string>
     <string name="sort_by_popularity_label">Most popular</string>
     <string name="sort_by_highest_rated_label">Highest rated</string>
+    <string name="sort_by_favorites_label">Favorites</string>
     <string name="sort_by_popularity_value" translatable="false">popularity.desc</string>
     <string name="sort_by_highest_rated_value" translatable="false">vote_average.desc</string>
+    <string name="sort_by_favorites_value" translatable="false">favorites</string>
     <string name="sort_by_default_value" translatable="false">popularity.desc</string>
 
 

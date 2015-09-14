@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_movie_fragment"
+    android:name="com.paularanas.popularmovies.MovieFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/placeholder"
-    tools:context="com.example.android.sunshine.app.MainActivity"
-    tools:ignore="MergeRootFrame" />
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp" />
+
+

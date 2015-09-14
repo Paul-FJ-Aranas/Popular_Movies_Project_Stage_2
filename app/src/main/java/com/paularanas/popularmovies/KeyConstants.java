@@ -5,6 +5,7 @@ package com.paularanas.popularmovies;
  */
 public class KeyConstants {
     public static final String BASE_URL = "http://api.themoviedb.org/3/discover/movie";
-    public static final String API_KEY = "[redacted]";
+    public static final String TRAILERS_REVIEWS_BASE_URL = "http://api.themoviedb.org/3/movie";
+    public static final String API_KEY = "[api key redacted]";
 
 }
