@@ -62,7 +62,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left"
-                    android:layout_marginLeft="@dimen/release_date_margin_left"
+                    android:layout_marginLeft="@dimen/release_date_tablet__margin_left"
                     android:layout_marginTop="@dimen/release_date_margin_top"
                     android:text=""
                     android:textAppearance="?android:attr/textAppearanceMedium"
@@ -74,7 +74,7 @@
                     android:id="@+id/textView_user_rating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/release_date_margin_left"
+                    android:layout_marginLeft="@dimen/user_rating_tablet_margin_left"
                     android:layout_marginTop="@dimen/release_date_margin_top"
                     android:layout_gravity="left"
                     android:text=""
@@ -86,7 +86,7 @@
                     android:id="@+id/favoriteButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/release_date_margin_left"
+                    android:layout_marginLeft="@dimen/favorite_button_tablet_margin_left"
                     android:layout_marginTop="@dimen/release_date_margin_top"
                     android:layout_gravity="left"
                     android:clickable="true"
@@ -104,13 +104,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/overview_margin_bottom"
-                android:layout_marginLeft="@dimen/overview_margin_left"
-                android:layout_marginRight="@dimen/overview_margin_right"
+                android:layout_marginLeft="@dimen/overview__land_margin_left"
+                android:layout_marginRight="@dimen/overview__land_margin_right"
                 android:layout_marginTop="@dimen/overview_margin_top"
                 android:text=""
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@color/teal"
-                android:textSize="@dimen/overview_text_size" />
+                android:textSize="@dimen/overview_text_size_tablet" />
 
 
             <RelativeLayout
@@ -142,14 +142,13 @@
             <RelativeLayout
                 android:id="@+id/review_container"
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content">
 
             </RelativeLayout>
 
+        </LinearLayout>
+
+
     </LinearLayout>
 
-
-</LinearLayout>
-
-    </ScrollView>
+</ScrollView>

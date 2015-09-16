@@ -7,7 +7,7 @@ import android.provider.BaseColumns;
 /**
  * Created by Paul Aranas on 8/30/2015.
  */
-public class MovieContract {
+class MovieContract {
 
     private MovieContract() {
     }
@@ -22,8 +22,6 @@ public class MovieContract {
             .appendPath(FavoriteMovieTable.TABLE_NAME).build();
     public static final String TYPE_FAVS = ContentResolver.CURSOR_DIR_BASE_TYPE
             + "/vnd." + AUTHORITY + FavoriteMovieTable.TABLE_NAME;
-    public static final String MOVIE_TRAILERS = "movie_trailers";
-    public static final String MOVIE_REVIEWS = "movie_reviews";
     private static final String COMMA = ",";
     private static final String TEXT = " TEXT";
     private static final String REAL = " REAL";

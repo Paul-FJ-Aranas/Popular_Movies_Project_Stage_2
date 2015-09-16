@@ -54,7 +54,7 @@ public class Trailer implements Parcelable {
         trailerSource = source.readString();
     }
 
-    public static ArrayList<Trailer> fromJson(JSONObject obj) {
+    public static ArrayList<Trailer> fromJson(JSONObject obj) throws JSONException {
         JSONObject trailers = null;
         JSONArray youtubeTrailers = null;
         JSONObject reviewsObject = null;
@@ -75,17 +75,16 @@ public class Trailer implements Parcelable {
                 continue;
             }
             Trailer tr = new Trailer();
-            try {
+
                 tr.trailerName = trailerObjects.getString("name");
                 tr.trailerSize = trailerObjects.getString("size");
                 tr.trailerSource = trailerObjects.getString("source");
-            } catch (JSONException exc) {
-                Log.e(TAG, "Json parsing error");
-            }
+
+
             if (tr != null) {
-                trailerList.add(tr);
-            }
-        }
+
+                    trailerList.add(tr);
+                }  }
             return trailerList;
 
     }

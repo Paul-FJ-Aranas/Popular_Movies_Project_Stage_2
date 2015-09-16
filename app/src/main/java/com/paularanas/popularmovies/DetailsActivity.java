@@ -3,11 +3,11 @@ package com.paularanas.popularmovies;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.view.MenuItemCompat;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ShareActionProvider;
 
 
 public class DetailsActivity extends AppCompatActivity {
@@ -24,36 +24,33 @@ public class DetailsActivity extends AppCompatActivity {
         if (movieIntent != null) {
 
             if (movieIntent.getParcelableExtra("movieData") instanceof Movie) {
-                object = getIntent().getParcelableExtra("movieData");
-
+                try {
+                    object = getIntent().getParcelableExtra("movieData");
+                } catch (NullPointerException exc) {
+                }
             } else if (movieIntent.getParcelableExtra("movieFavData") instanceof FavoriteMovie) {
+                try {
 
-                object = getIntent().getParcelableExtra("movieFavData");
+                    object = getIntent().getParcelableExtra("movieFavData");
+                } catch (NullPointerException exc) {
+                }
+            }
+            if (savedInstanceState == null) {
+                try{
+
+                DetailsActivityFragment detailsFragment = DetailsActivityFragment.newInstance(object);
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.add(R.id.movie_detail_container, detailsFragment);
+                transaction.commit(); }
+             catch (Exception e) {}
+                Log.e("TAG", "Error with fragment instantiation");
             }
         }
-        if (savedInstanceState == null) {
-
-
-            DetailsActivityFragment detailsFragment = DetailsActivityFragment.newInstance(object);
-            android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.add(R.id.movie_detail_container, detailsFragment);
-            transaction.commit();
-        }
-
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_details, menu);
 
-        MenuItem shareItem = menu.findItem(R.id.menu_item_share);
-     android.support.v7.widget.ShareActionProvider mShareActionProvider =
-                (android.support.v7.widget.ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-
-
-
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -65,11 +62,15 @@ public class DetailsActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startActivity(new Intent(this, Settings.class));
-            return true;
+            try {
+                startActivity(new Intent(this, Settings.class));
+                return true;
+            } catch (Exception e) {}
+        } if  (id == android.R.id.home) {
+                finish();
+                return true;
         }
+        return super.onOptionsItemSelected(item);
 
-        return true;
     }
-
 }

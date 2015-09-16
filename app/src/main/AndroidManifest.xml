@@ -26,6 +26,8 @@
             android:theme="@style/Theme.AppCompat.Light"
             android:label="@string/title_activity_details"
             android:parentActivityName=".MainActivity">
+            <meta-data android:name=".DetailsActivity"
+                android:value=".MainActivity"/>
         </activity>
         <activity
             android:name=".Settings"

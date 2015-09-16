@@ -1,3 +1,4 @@
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -15,7 +16,7 @@
         android:title="Share"
         android:icon ="@drawable/ic_action_name"
         app:actionProviderClass=
-            "android.support.v7.widget.ShareActionProvider" />
-    </menu>
-
+            "android.support.v7.widget.ShareActionProvider"
+        tools:ignore="HardcodedText" />
+</menu>
 

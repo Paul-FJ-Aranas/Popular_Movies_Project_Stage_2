@@ -1,32 +1,25 @@
+
 package com.paularanas.popularmovies;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.internal.view.menu.MenuItemWrapperICS;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
-import android.widget.ShareActionProvider;
-
-import java.util.zip.Inflater;
 
 
 public class MainActivity extends AppCompatActivity implements MovieFragment.OnMovieSelectedListener {
-    private Boolean mTwoPane = false;
-    private Parcelable movieObject;
-    private Bundle state;
+    public static Boolean sTwoPane = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         establishPaneLayout();
-        state = savedInstanceState;
+
 
     }
 
@@ -34,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.OnM
         FrameLayout fragmentItemDetail = (FrameLayout) findViewById(R.id.movie_detail_container);
 
         if (fragmentItemDetail != null) {
-            mTwoPane = true;
+            sTwoPane = true;
             MovieFragment movieFragment =
                     (MovieFragment) getFragmentManager().findFragmentById(R.id.main_movie_fragment);
             movieFragment.setActivateOnMovieClick(true);
@@ -54,26 +47,32 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.OnM
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, Settings.class));
             return true;
-        }
 
+    }
         return super.onOptionsItemSelected(item);
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
-        return true;
+        if(!MainActivity.sTwoPane) {
+            getMenuInflater().inflate(R.menu.menu_settings, menu);
+
+            return true;
+        } else{
+            return false;
+        }
     }
 
 
     @Override
     public void onMovieSelected(Parcelable movieObject) {
 
-        if (mTwoPane) { // one activity, replace framelayout with new details fragment
-                DetailsActivityFragment fragmentDetails = DetailsActivityFragment.newInstance(movieObject);
-                android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.movie_detail_container, fragmentDetails);
-                transaction.commit();
+        if (sTwoPane) { // one activity, replace framelayout with new details fragment
+            DetailsActivityFragment fragmentDetails = DetailsActivityFragment.newInstance(movieObject);
+            android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.movie_detail_container, fragmentDetails);
+            transaction.commit();
 
         } else {
             // go to separate activity
@@ -89,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.OnM
 
     }
 }
+
 
 
 

@@ -1,9 +1,7 @@
 package com.paularanas.popularmovies;
 
-import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -14,7 +12,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ShareCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,11 +20,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.RelativeLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,6 +37,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -76,6 +71,7 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
 
 
     public DetailsActivityFragment() {
+
 
     }
 
@@ -121,15 +117,17 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
             CharSequence text = getString(R.string.network_unavailable_message);
             networkUnavailableMessage = Toast.makeText(getActivity(), text, Toast.LENGTH_LONG);
             networkUnavailableMessage.show();
-        } else {
+        } else if (savedInstanceState == null && !sortValue.equals("favorites") && trailerReviewTask == null) {
+            //fetch trailer and review data
 
-            if (savedInstanceState == null && !sortValue.equals("favorites") && trailerReviewTask == null) {
-                //fetch trailer and review data
+            try {
                 trailerReviewTask = (TrailerReviewTask) new TrailerReviewTask(this, favoriteButton).execute(movieId);
+            } catch
+                    (Exception exc) {
+                Log.e("TAG", "Error launching the trailer task");
 
             }
         }
-
 
         return view;
     }
@@ -180,14 +178,18 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
         inflater.inflate(R.menu.menu_main, menu);
         MenuItem shareItem = menu.findItem(R.id.menu_item_share);
         mShareActionProvider =
-        (android.support.v7.widget.ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+                (android.support.v7.widget.ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
 
-               }
+    }
 
 
-    public void createShareTrailerIntent(ArrayList <Trailer> list) {
-        Intent trailerIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + list.get(0).getSource()));
-        if (mShareActionProvider != null ) {
+    public void createShareTrailerIntent(ArrayList<Trailer> list) {
+        Intent trailerIntent = null;
+        try {
+            trailerIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + list.get(0).getSource()));
+        } catch (Exception e) {
+        }
+        if (mShareActionProvider != null) {
             mShareActionProvider.setShareIntent(trailerIntent);
         } else {
             Log.d(LOG_TAG, "Share Action Provider is null?");
@@ -239,10 +241,7 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
         ConnectivityManager connMgr = (ConnectivityManager)
                 getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnected()) {
-            return true;
-        }
-        return false;
+        return netInfo != null && netInfo.isConnected();
 
     }
 
@@ -294,7 +293,7 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
 
         TextView firstReview = new TextView(context);
         if (reviewList.isEmpty()) {
-            firstReview.setText("No reviews");
+            firstReview.setText(R.string.no_reviews);
         } else {
             firstReview.setText(reviewList.get(0).getAuthor() + "\n \n" + reviewList.get(0).getContent());
         }
@@ -432,7 +431,6 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
 
     }
 
-
     public void onClick(View v) {
 
         if (v.getId() == seeAllClickText.getId()) {
@@ -449,6 +447,7 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
             saveFavorites();
         }
     }
+
 
     public void saveFavorites() {
         {
@@ -485,7 +484,6 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
                         }
                     }
                     String filmReviewId = reviewIdBuilder.toString();
-                    Log.d("SSSAW", filmReviewId);
                     String filmReviewAuthor = reviewAuthorBuilder.toString();
                     String filmReviewContent = reviewContentBuilder.toString();
 
@@ -525,26 +523,17 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
 
             Toast toast = null;
             if (toast == null) {
-                toast.makeText(context, "Saved to favorites", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Saved to favorites", Toast.LENGTH_SHORT).show();
             } else {
                 toast.cancel();
             }
         }
     }
 
-    public void reviewDataFunnel(ArrayList<Review> filmReviewList) {
-        reviewList = filmReviewList;
-    }
-
-    public void trailerDataFunnel(ArrayList<Trailer> trailerList) {
-        movieTrailerList = trailerList;
-    }
-
-
     private static class TrailerReviewTask extends AsyncTask<String, Void, JSONObject> {
         JSONObject jsonObj;
         private static final String LOG_TAG = "Error: ";
-        DetailsActivityFragment uIContainer;
+        final DetailsActivityFragment uIContainer;
         ImageView favoriteButton;
 
         public TrailerReviewTask(DetailsActivityFragment act, ImageView saveButton) {
@@ -552,58 +541,6 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
             favoriteButton = saveButton;
 
 
-        }
-
-
-        @Override
-        protected JSONObject doInBackground(String... params) {
-            //connect to the network
-            HttpURLConnection connection = null;
-            InputStream inputStream = null;
-            String api_key = KeyConstants.API_KEY;
-            String baseUrl = KeyConstants.TRAILERS_REVIEWS_BASE_URL;
-            JSONObject jObject = null;
-            URL myURL;
-            String url;
-
-            try {
-
-                url = Uri.parse(baseUrl).buildUpon().appendPath(params[0])
-                        .appendQueryParameter("api_key", api_key).appendQueryParameter("append_to_response", "trailers,reviews")
-                        .build().toString();
-
-
-                myURL = new URL(url);
-
-
-                connection = (HttpURLConnection) myURL.openConnection();
-                connection.setRequestMethod("GET");
-                inputStream = connection.getInputStream();
-                String jsonFeed = processJsonFeed(inputStream);
-                jObject = stringToJsonObject(jsonFeed);
-
-            } catch (MalformedURLException e) {
-                Log.e(LOG_TAG, "Malformed URL");
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "IO connection error");
-
-            } finally
-
-            {
-                if (connection != null) {
-                    connection.disconnect();
-                }
-                if (inputStream != null) {
-                    try {
-                        inputStream.close();
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "Unable to close input stream");
-                    }
-                }
-            }
-
-
-            return jObject;
         }
 
         public String processJsonFeed(InputStream stream) {
@@ -635,6 +572,77 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
             return jObject;
         }
 
+
+        @Override
+        protected JSONObject doInBackground(String... params) {
+            //connect to the network
+            HttpURLConnection connection = null;
+            InputStream inputStream = null;
+            String api_key = KeyConstants.API_KEY;
+            String baseUrl = KeyConstants.TRAILERS_REVIEWS_BASE_URL;
+            JSONObject jObject = null;
+            URL myURL = null;
+            String url;
+
+            try {
+
+                url = Uri.parse(baseUrl).buildUpon().appendPath(params[0])
+                        .appendQueryParameter("api_key", api_key).appendQueryParameter("append_to_response", "trailers,reviews")
+                        .build().toString();
+
+
+                myURL = new URL(url);
+            } catch (MalformedURLException e) {
+            }
+
+
+            try {
+                connection = (HttpURLConnection) myURL.openConnection();
+
+            } catch (NullPointerException e) {
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                connection.setRequestMethod("GET");
+            } catch (ProtocolException e1) {
+                e1.printStackTrace();
+            }
+
+            try {
+                inputStream = connection.getInputStream();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
+            try {
+
+                String jsonFeed = processJsonFeed(inputStream);
+                jObject = stringToJsonObject(jsonFeed);
+
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "IO connection error");
+
+            } finally
+
+            {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        Log.e(LOG_TAG, "Unable to close input stream");
+                    }
+                }
+            }
+
+
+            return jObject;
+        }
+
+
         @Override
         protected void onPostExecute(JSONObject obj) {
         /*extract json array from object pass to methods inside Movie class
@@ -644,12 +652,21 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
             jsonObj = obj;
 
             //instantiate detail views with data
-            ArrayList<Trailer> trailerList = Trailer.fromJson(obj);
-            ArrayList<Review> reviewList = Review.fromJson(obj);
 
+
+            ArrayList<Review> reviewList = Review.fromJson(obj);
+            ArrayList<Trailer> trailerList = null;
+            try {
+                trailerList = Trailer.fromJson(obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             uIContainer.createShareTrailerIntent(trailerList);
+
             uIContainer.trailerCreator(trailerList);
             uIContainer.reviewCreator(reviewList);
+            //instantiate detail views with data
+
 
 
             //instantiate views and set data from api
@@ -723,7 +740,7 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
             RelativeLayout.LayoutParams params2 = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.MATCH_PARENT);
 
             uIContainer.seeAllClickText = new TextView(uIContainer.context);
-            uIContainer.seeAllClickText.setText("See all");
+            uIContainer.seeAllClickText.setText(R.string.see_all);
             uIContainer.seeAllClickText.setTextColor(uIContainer.context.getResources().getColor(R.color.teal));
             uIContainer.seeAllClickText.setClickable(true);
             uIContainer.seeAllClickText.setId(2);
@@ -735,11 +752,11 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
 
             TextView firstReview = new TextView(uIContainer.context);
             if (reviewList.isEmpty()) {
-                firstReview.setText("No reviews");
+                firstReview.setText(R.string.no_reviews);
             } else {
                 firstReview.setText(uIContainer.reviewList.get(0).getAuthor() + "\n \n" + reviewList.get(0).getContent());
             }
-            firstReview.setTextColor(uIContainer.context.getResources().getColor(R.color.teal));
+            firstReview.setTextColor(uIContainer.context.getResources().getColor(R.color.teal));;
             firstReview.setId(1);
             params1.addRule(RelativeLayout.ALIGN_PARENT_LEFT, uIContainer.seeAllClickText.getId());
             params1.addRule(RelativeLayout.ALIGN_RIGHT, uIContainer.seeAllClickText.getId());
@@ -764,26 +781,4 @@ public class DetailsActivityFragment extends Fragment implements View.OnClickLis
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

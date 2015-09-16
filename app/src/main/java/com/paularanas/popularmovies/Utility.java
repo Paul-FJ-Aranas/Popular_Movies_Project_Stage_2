@@ -7,7 +7,7 @@ import android.preference.PreferenceManager;
 /**
  * Created by Paul Aranas on 8/16/2015.
  */
-public class Utility {
+class Utility {
 
     // return sort order preference
     public static String getSortingOrderPreference(Context context) {
@@ -24,6 +24,15 @@ public class Utility {
         editor.putString("sort_by", context.getString(R.string.sort_by_popularity_value));
         editor.apply();
 
+    }
+    public static String initializeOffLineFavSortPref(Context context) {
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("sort_by", context.getString(R.string.sort_by_favorites_value));
+        editor.apply();
+
+        return null;
     }
 
 }

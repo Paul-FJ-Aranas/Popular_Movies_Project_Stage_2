@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * Created by Paul Aranas on 9/4/2015.
  */
 public class ReviewDialogFragment extends android.support.v4.app.DialogFragment {
-    TextView content = null;
+    private TextView content = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,7 +29,7 @@ public class ReviewDialogFragment extends android.support.v4.app.DialogFragment 
         StringBuilder buffer = new StringBuilder();
         if (allReviewsList != null) {
             for (int i = 0; i < allReviewsList.size(); i++) {
-                    String reviewListItem = "Reviewer: " + allReviewsList.get(i).getAuthor() + "\n \n" + allReviewsList.get(i).getContent() + "\n \n \n";
+                    String reviewListItem = getString(R.string.reviewer) + allReviewsList.get(i).getAuthor() + "\n \n" + allReviewsList.get(i).getContent() + "\n \n \n";
                     buffer.append(reviewListItem);
                 }
             }
@@ -38,7 +38,7 @@ public class ReviewDialogFragment extends android.support.v4.app.DialogFragment 
             if (!allReviews.isEmpty()) {
                 content.setText(allReviews);
             } else {
-                content.setText("No reviews");
+                content.setText(R.string.no_reviews);
 
             }
             return view;
