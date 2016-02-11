@@ -88,7 +88,7 @@ public class Movie<T extends Parcelable> implements Parcelable, MovieAdapterInte
 
 
     public static ArrayList<Movie> fromJson(JSONArray jsonArray) {
-        ArrayList<Movie> movies = movies = new ArrayList<>(jsonArray.length());
+        ArrayList<Movie> movies = new ArrayList<>(jsonArray.length());
 
         //loop through results in json array, decode and convert to movie object
         for (int i = 0; i < jsonArray.length(); i++) {
